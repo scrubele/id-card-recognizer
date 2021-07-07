@@ -281,6 +281,27 @@ def find_closed_contours(input_img, contours):
     return img
 
 
+def apply_morphology(input_gray):
+    gray = input_gray.copy()
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    gray = cv2.morphologyEx(gray, cv2.MORPH_ERODE, kernel)
+    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph.png", gray)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+    gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
+    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_1.png", gray)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    gray = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
+    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_2.png", gray)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    gray = cv2.morphologyEx(gray, cv2.MORPH_ERODE, kernel)
+    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_3.png", gray)
+    return gray
+
+
 # ROTATE IMAGE
 
 
@@ -396,9 +417,7 @@ def process_threshold_approach(img, image_name="1.jpg"):
     binarized_gray = cv2.cvtColor(binarized_gray, cv2.COLOR_BGR2GRAY)
     binarized_gray = cv2.dilate(binarized_gray, kernel)
     # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "otsu_binarized.png", binarized)
-    # cv2.imwrite(
-    #     DEBUG_FOLDER + image_name + "_" + "otsu_binarized_gray.png", binarized_gray
-    # )
+    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "otsu_binarized_gray.png", binarized_gray)
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.adaptiveThreshold(
@@ -409,27 +428,15 @@ def process_threshold_approach(img, image_name="1.jpg"):
     # gray = cv2.GaussianBlur(gray, (5, 5), 7)
     # edges = cv2.Canny(gray, 50, 150)
     # dilated = cv2.dilate(gray, np.ones((3, 3), dtype=np.uint8))
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    gray = cv2.morphologyEx(gray, cv2.MORPH_ERODE, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph.png", gray)
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
-    gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_1.png", gray)
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    gray = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_2.png", gray)
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    gray = cv2.morphologyEx(gray, cv2.MORPH_ERODE, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_3.png", gray)
+    
+    # gray = apply_morphology(binarized_gray)
+    gray = apply_morphology(gray)
 
     contours, contour_image = find_contours(input_img, binarized_gray)
     contour_image = adjust_contours(binarized_gray, contours)
     # cv2.imshow("contour_image", contour_image)
     # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "contours.png", contour_image)
+    
     closed_contour_image = find_closed_contours(input_img, contours)
     # cv2.imshow("convex", closed_contour_image)
     # cv2.waitKey(0)
