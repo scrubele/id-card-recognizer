@@ -428,7 +428,7 @@ def process_threshold_approach(img, image_name="1.jpg"):
     # gray = cv2.GaussianBlur(gray, (5, 5), 7)
     # edges = cv2.Canny(gray, 50, 150)
     # dilated = cv2.dilate(gray, np.ones((3, 3), dtype=np.uint8))
-    
+
     # gray = apply_morphology(binarized_gray)
     gray = apply_morphology(gray)
 
@@ -436,7 +436,7 @@ def process_threshold_approach(img, image_name="1.jpg"):
     contour_image = adjust_contours(binarized_gray, contours)
     # cv2.imshow("contour_image", contour_image)
     # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "contours.png", contour_image)
-    
+
     closed_contour_image = find_closed_contours(input_img, contours)
     # cv2.imshow("convex", closed_contour_image)
     # cv2.waitKey(0)
