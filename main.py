@@ -4,7 +4,9 @@ from os.path import isfile, join
 import fire
 
 from src import TEST_FOLDER
-from src.data.preprocessor import preprocess_data
+from src.data.preprocessors.core import preprocess_data
+# from src.data.preprocessors.matchers.core import preprocess_data
+# from src.data.preprocessors.detectors.core import preprocess_data
 
 
 def preprocess_test_data(file_name="."):
