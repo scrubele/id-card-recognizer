@@ -1,1 +1,1 @@
-# it-jim-id-card-reader
+# it-jim-id-card-recognizer

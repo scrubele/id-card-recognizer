@@ -5,6 +5,8 @@ import numpy as np
 from scipy.stats import mode
 from skimage.transform import hough_line, hough_line_peaks
 
+from src import logger
+
 
 def get_cartesian_coordinates(angle, rho):
     a = np.cos(angle)
@@ -143,16 +145,14 @@ def process_hough_lines_approach(img, image_name=""):
     dilated = cv2.dilate(edges, np.ones((3, 3), dtype=np.uint8))
 
     hough_lines = find_hough_lines(gray)
-    # hough_line_img = draw_hough_lines(input_img, hough_lines, line_number=8)
-    # cv2.imshow("Hough lines", hough_line_img)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_dilated.png", img)
+    hough_line_img = draw_hough_lines(input_img, hough_lines, line_number=8)
+    logger.log_image(image_name, stage_name="hough_lines", image=hough_line_img, save=False)
 
     horizontal_lines, vertical_lines = segment_lines_by_direction_by_polar_coord(
         hough_lines, delta=800
     )
-    # segmented_lines = draw_segmented_lines(input_img, horizontal_lines, vertical_lines)
-    # cv2.imshow("Segmented Hough Lines", segmented_lines)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "hough.png", segmented_lines)
+    segmented_lines = draw_segmented_lines(input_img, horizontal_lines, vertical_lines)
+    logger.log_image(image_name, stage_name="segmented_lines", image=segmented_lines, save=False)
 
     intersection_points = find_all_lines_intersection(horizontal_lines, vertical_lines)
     center_points = find_cluster_points(intersection_points, nclusters=4)
@@ -166,9 +166,7 @@ def process_hough_lines_approach(img, image_name=""):
     points_image = draw_points(points_image, center_points, color=[255, 0, 0])
     points_image = draw_points(points_image, extreme_points, color=[0, 255, 0])
     points_image = draw_points(points_image, corner_points, color=[0, 0, 255])
-    # cv2.imshow("Points", points_image)
-    # cv2.waitKey(0)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "points.png", points_image)
+    logger.log_image(image_name, stage_name="points", image=points_image, save=True)
 
     skew_angle = find_skew_angle(img, edges)
     # print(f"Best angle:{skew_angle}")

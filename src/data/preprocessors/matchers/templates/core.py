@@ -1,10 +1,8 @@
-import os
-
 import cv2
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from src import DEBUG_FOLDER
+from src import logger
 from src.data.preprocessors.matchers.templates.utils import apply_template_matching_method
 
 TEMPLATE_MATCHING_METHODS = ["cv2.TM_CCOEFF", "cv2.TM_CCOEFF_NORMED", "cv2.TM_CCORR",
@@ -27,4 +25,4 @@ def process_template_matching_method_comparison(template, input_img, image_name,
         ax.set_title(method)
         ax = fig.add_subplot(gs[1, i])
         ax.imshow(cv2.cvtColor(polygon_image, cv2.COLOR_BGR2RGB))
-    fig.savefig(str(os.path.join(DEBUG_FOLDER, image_name + "_template_comparison_plot.png")))
+    logger.log_figure(fig, image_name + "_template_comparison_plot")

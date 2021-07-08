@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-from src.data.preprocessors.detectors.contours import find_contours
 from src.data.preprocessors.detectors.hough_lines import find_skew_angle
 
 

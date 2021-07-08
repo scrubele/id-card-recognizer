@@ -20,9 +20,6 @@ def crop_by_coordinates(input_img, coordinates):
     roi = img[y1:y2, x1:x2]
 
     cv2.rectangle(img, (x1, y1), (x2, y2), (200, 0, 0), 2)
-    # cv2.imshow("cropped_image", roi)
-    # cv2.waitKey(0)
-    # cv2.imwrite(DEBUG_FOLDER + "image-cont.jpg", img)
     return roi
 
 
@@ -41,6 +38,7 @@ def crop_image(img, image_name=""):
     x1, x2 = sorted([int(point_1[0]), int(point_3[0])])
     y1, y2 = sorted([int(point_1[1]), int(point_3[1])])
     x1, y1, x2, y2 = crop_by_coordinates(img, [x1, y1, x2, y2])
+    return x1, y1, x2, y2
 
 
 def clip_by_coordinates(input_img, polygon_coord, name=""):

@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from src import logger
+
 
 def order_points(points):
     rectangle = np.zeros((4, 2), dtype="float32")
@@ -33,7 +35,7 @@ def four_point_transform(image, points, max_width, max_height):
     return warped
 
 
-def warp_image(image):
+def warp_image(image, image_name=""):
     input_image = image.copy()
 
     gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -41,7 +43,7 @@ def warp_image(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 30))
     gray_img = cv2.morphologyEx(gray_img, cv2.MORPH_DILATE, kernel)
     gray_img = cv2.Canny(gray_img, 50, 150)
-    cv2.imshow("gray", gray_img)
+    logger.log_image(image_name=image_name, stage_name="warp_cropped", image=gray_img, save=False)
     contours, hierarchy = cv2.findContours(
         gray_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
     )
@@ -58,7 +60,6 @@ def warp_image(image):
     # image = draw_points(image, box_points)
     warped = four_point_transform(image, box_points, input_image.shape[1], input_image.shape[0])
 
-    # cv2.imshow("original", image)
-    # cv2.imshow("warped", warped)
-    # cv2.waitKey(0)
+    logger.log_image(image_name=image_name, stage_name="original", image=input_image, save=True)
+    logger.log_image(image_name=image_name, stage_name="warped", image=warped, save=True)
     return warped

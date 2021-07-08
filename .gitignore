@@ -131,6 +131,6 @@ dmypy.json
 
 # Project
 data/debug/*
-
+logs/
 
 .idea

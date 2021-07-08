@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from src import logger
+
 
 def erase_small_contours(input_img, contours, max_area=10, max_aspect_ratio=1.5):
     """
@@ -127,24 +129,21 @@ def make_otsu_channel_binarization(img):
     return image_channels
 
 
-def apply_morphology(input_gray):
+def apply_morphology(input_gray, image_name=""):
     gray = input_gray.copy()
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     gray = cv2.morphologyEx(gray, cv2.MORPH_ERODE, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph.png", gray)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
     gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_1.png", gray)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     gray = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_2.png", gray)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     gray = cv2.morphologyEx(gray, cv2.MORPH_ERODE, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "morph_3.png", gray)
+    logger.log_image(image_name, stage_name="morphology", image=gray, save=True)
     return gray
 
 
@@ -156,30 +155,21 @@ def process_contour_detection_approach(img, image_name="1.jpg"):
     binarized_gray = cv2.morphologyEx(binarized, cv2.MORPH_ERODE, kernel)
     binarized_gray = cv2.cvtColor(binarized_gray, cv2.COLOR_BGR2GRAY)
     binarized_gray = cv2.dilate(binarized_gray, kernel)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "otsu_binarized.png", binarized)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "otsu_binarized_gray.png", binarized_gray)
+    logger.log_image(image_name, stage_name="binarized_gray", image=binarized_gray, save=True)
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.adaptiveThreshold(
         gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 5
     )
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "adaptiveThreshold.png", gray)
-
-    # gray = cv2.GaussianBlur(gray, (5, 5), 7)
-    # edges = cv2.Canny(gray, 50, 150)
-    # dilated = cv2.dilate(gray, np.ones((3, 3), dtype=np.uint8))
-
-    # gray = apply_morphology(binarized_gray)
-    gray = apply_morphology(gray)
+    gray = apply_morphology(gray, image_name)
+    logger.log_image(image_name, stage_name="gray", image=gray, save=True)
 
     contours, contour_image = find_contours(input_img, binarized_gray)
     contour_image = adjust_contours(binarized_gray, contours)
-    # cv2.imshow("contour_image", contour_image)
-    # cv2.imwrite(DEBUG_FOLDER + image_name + "_" + "contours.png", contour_image)
+    logger.log_image(image_name, stage_name="contour_image", image=contour_image, save=True)
 
     closed_contour_image = find_closed_contours(input_img, contours)
-    # cv2.imshow("convex", closed_contour_image)
-    # cv2.waitKey(0)
+    logger.log_image(image_name, stage_name="closed_contour_image", image=closed_contour_image, save=True)
 
 
 def detect_linear_contours_approach(input_img, image_name=""):
@@ -191,12 +181,10 @@ def detect_linear_contours_approach(input_img, image_name=""):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(9, 9))
     dilated = cv2.dilate(img, kernel)
     edges = cv2.Canny(dilated, threshold1=0, threshold2=84, apertureSize=3)
-    # cv2.imshow("edges", edges)
-    # cv2.waitKey(0)
+    logger.log_image(image_name, stage_name="edges", image=edges, save=True)
 
     edges = add_hough_lines_to_edges(edges)
     contours, _ = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     linear_contours = simplify_contours_down_to_polygons(contours)
     linear_contours_image = draw_linear_contours(img, linear_contours)
-    # cv2.imshow("linear_contours_image", linear_contours_image)
-    # cv2.waitKey(0)
+    logger.log_image(image_name, stage_name="linear_contours_image", image=linear_contours_image, save=True)

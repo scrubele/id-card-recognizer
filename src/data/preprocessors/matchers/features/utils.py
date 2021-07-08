@@ -1,11 +1,9 @@
-import os
-
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.stats import norm
 
-from src import DEBUG_FOLDER
+from src import logger
 
 
 def apply_feature_detector(feature_detector, template_image, input_image):
@@ -38,10 +36,12 @@ def get_match(match, dimension=0):
 
 
 def calculate_distance_distribution(matches):
+    np.seterr(all="raise")
     distances = sorted([get_match(match_list).distance for match_list in matches])
-    if len(distances) > 0:
+    try:
         probability_distribution = norm.cdf(distances, np.mean(distances), np.std(distances))
-    else:
+    except Exception:
+        logger.warning("Probability distribution encountered mean of empty slice")
         probability_distribution = []
     return distances, probability_distribution
 
@@ -49,14 +49,14 @@ def calculate_distance_distribution(matches):
 def make_distance_ratio_distribution(matches, good_matches, name="", display=False):
     distances, prob_distribution = calculate_distance_distribution(matches)
     good_distances, good_prob_distribution = calculate_distance_distribution(good_matches)
-
-    fig, ax = plt.subplots(figsize=(11, 8))
-    ax.plot(distances, prob_distribution)
-    ax.plot(good_distances, good_prob_distribution)
-    ax.set_title(name)
-    if display:
-        plt.show()
-    fig.savefig(str(os.path.join(DEBUG_FOLDER, name + "_distance_ratio.png")))
+    if len(good_distances) > 0 and len(good_prob_distribution) > 0:
+        fig, ax = plt.subplots(figsize=(11, 8))
+        ax.plot(distances, prob_distribution)
+        ax.plot(good_distances, good_prob_distribution)
+        ax.set_title(name)
+        if display:
+            plt.show()
+        logger.log_figure(fig, name + "_template_comparison_plot")
 
 
 def draw_polygon(img, polygon_corners):
@@ -84,5 +84,5 @@ def detect_homography_polygon(input_image, template_image, template_keypoints, i
         img = draw_polygon(img, polygon_corners)
         return img, polygon_corners
     else:
-        print("Not enough matches are found - {}/{}".format(len(good_matches), min_match_count))
+        logger.warning("Not enough matches are found - {}/{}".format(len(good_matches), min_match_count))
         return img, []

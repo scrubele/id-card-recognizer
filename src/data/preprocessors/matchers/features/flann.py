@@ -1,8 +1,6 @@
-import os
-
 import cv2
 
-from src import DEBUG_FOLDER
+from src import logger
 from src.data.preprocessors.matchers.features.utils import make_distance_ratio_distribution, \
     extract_good_matches, apply_feature_detector, extract_good_matches_mask, detect_homography_polygon
 
@@ -22,7 +20,7 @@ def flann_matcher(template_image, input_image, image_name="", name="flann", algo
     good_flann_matches = cv2.drawMatchesKnn(
         template_image, template_keypoints, input_image, image_keypoints, good_matches, None, flags=2
     )
-    # cv2.imshow("good_flann_matches", good_flann_matches)
+    logger.log_image(image_name, stage_name="flann_good_matches", image=good_flann_matches, save=True)
 
     matches_mask = extract_good_matches_mask(matches, ratio=0.5)
     draw_params = dict(
@@ -34,13 +32,9 @@ def flann_matcher(template_image, input_image, image_name="", name="flann", algo
     flann_matches = cv2.drawMatchesKnn(
         template_image, template_keypoints, input_image, image_keypoints, matches, None, **draw_params
     )
-    # cv2.imshow("flann_matches_mask", flann_matches)
-    # cv2.waitKey(0)
+    logger.log_image(image_name, stage_name="flann_matches", image=flann_matches, save=True)
 
     polygon_image, polygon_corners = detect_homography_polygon(input_image, template_image, template_keypoints,
                                                                image_keypoints, good_matches, min_match_count=5)
-    cv2.imwrite(str(os.path.join(DEBUG_FOLDER, image_name + "_polygon_" + name + ".png")), polygon_image)
-
-    # cv2.imshow("polygon_image", polygon_image)
-    # cv2.waitKey(0)
+    logger.log_image(image_name, stage_name="flann_polygons", image=polygon_image, save=True)
     return polygon_corners
