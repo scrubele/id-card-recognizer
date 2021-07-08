@@ -5,7 +5,7 @@ import sys
 import cv2
 import yaml
 
-PROGRESS = 60
+PROGRESS = 25
 
 
 class MyLogger(logging.Logger):
