@@ -1,6 +1,7 @@
 import os
 
 import cv2
+import fire
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -40,7 +41,10 @@ def get_match(match, dimension=0):
 
 def calculate_distance_distribution(matches):
     distances = sorted([get_match(match_list).distance for match_list in matches])
-    probability_distribution = norm.cdf(distances, np.mean(distances), np.std(distances))
+    if len(distances) > 0:
+        probability_distribution = norm.cdf(distances, np.mean(distances), np.std(distances))
+    else:
+        probability_distribution = []
     return distances, probability_distribution
 
 
@@ -55,6 +59,11 @@ def make_distance_ratio_distribution(matches, good_matches, name="", display=Fal
     if display:
         plt.show()
     fig.savefig(str(os.path.join(DEBUG_FOLDER, name + "_distance_ratio.png")))
+
+
+def draw_polygon(img, polygon_corners):
+    cv2.polylines(img, [np.int32(polygon_corners)], True, 255, 3, cv2.LINE_AA)
+    return img
 
 
 def detect_homography_polygon(input_image, template_image, template_keypoints, image_keypoints, good_matches,
@@ -72,13 +81,13 @@ def detect_homography_polygon(input_image, template_image, template_keypoints, i
 
         h, w, d = template_image.shape
         obj_corners = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-        box_corners = cv2.perspectiveTransform(obj_corners, M)
+        polygon_corners = cv2.perspectiveTransform(obj_corners, M)
 
-        cv2.polylines(img, [np.int32(box_corners)], True, 255, 3, cv2.LINE_AA)
-        return img
+        img = draw_polygon(img, polygon_corners)
+        return img, polygon_corners
     else:
         print("Not enough matches are found - {}/{}".format(len(good_matches), min_match_count))
-        return img
+        return img, []
 
 
 def brute_force_matching_with_orb(template_image, input_image, image_name="", name="_brute_force_orb"):
@@ -101,16 +110,17 @@ def brute_force_matching_with_orb(template_image, input_image, image_name="", na
     # cv2.imshow("brute_force_matching_with_orb", orb_matches)
     # cv2.waitKey(0)
 
-    polygon_image = detect_homography_polygon(input_image, template_image, template_keypoints, image_keypoints, matches,
-                                              min_match_count=5)
+    polygon_image, polygon_corners = detect_homography_polygon(input_image, template_image, template_keypoints,
+                                                               image_keypoints, matches, min_match_count=5)
     cv2.imwrite(str(os.path.join(DEBUG_FOLDER, image_name + "_polygon_" + name + ".png")), polygon_image)
 
     # cv2.imshow("polygon_image", polygon_image)
     # cv2.waitKey(0)
+    return polygon_corners
 
 
 def bruto_force_matching_with_sift(template_image, input_image, image_name="", name="bruto_force_sift"):
-    sift = cv2.xfeatures2d.SIFT_create()
+    sift = cv2.SIFT_create()
     template_keypoints, template_descriptors, image_keypoints, image_descriptors = apply_feature_detector(
         feature_detector=sift, template_image=template_image, input_image=input_image)
 
@@ -126,16 +136,17 @@ def bruto_force_matching_with_sift(template_image, input_image, image_name="", n
     # cv2.imshow("bruto_force_matching_with_sift", sift_matches)
     # cv2.waitKey(0)
 
-    polygon_image = detect_homography_polygon(input_image, template_image, template_keypoints, image_keypoints,
-                                              good_matches,
-                                              min_match_count=5)
+    polygon_image, polygon_corners = detect_homography_polygon(input_image, template_image, template_keypoints,
+                                                               image_keypoints, good_matches, min_match_count=5)
     cv2.imwrite(str(os.path.join(DEBUG_FOLDER, image_name + "_polygon_" + name + ".png")), polygon_image)
+
     # cv2.imshow("polygon_image", polygon_image)
     # cv2.waitKey(0)
+    return polygon_corners
 
 
 def flann_matcher(template_image, input_image, image_name="", name="flann"):
-    sift = cv2.xfeatures2d.SIFT_create()
+    sift = cv2.SIFT_create()
     template_keypoints, template_descriptors, image_keypoints, image_descriptors = apply_feature_detector(
         feature_detector=sift, template_image=template_image, input_image=input_image)
 
@@ -165,12 +176,13 @@ def flann_matcher(template_image, input_image, image_name="", name="flann"):
     # cv2.imshow("flann_matches_mask", flann_matches)
     # cv2.waitKey(0)
 
-    polygon_image = detect_homography_polygon(input_image, template_image, template_keypoints, image_keypoints,
-                                              good_matches,
-                                              min_match_count=5)
+    polygon_image, polygon_corners = detect_homography_polygon(input_image, template_image, template_keypoints,
+                                                               image_keypoints, good_matches, min_match_count=5)
     cv2.imwrite(str(os.path.join(DEBUG_FOLDER, image_name + "_polygon_" + name + ".png")), polygon_image)
+
     # cv2.imshow("polygon_image", polygon_image)
     # cv2.waitKey(0)
+    return polygon_corners
 
 
 # TEMPLATE MATCHING METHODS
@@ -193,7 +205,8 @@ def apply_template_matching_method(input_img, method_name, template):
     polygon_image = cv2.rectangle(
         current_input_img, top_left, bottom_right, color=(0, 0, 255), thickness=2
     )
-    return result, polygon_image
+    polygon_coordinates = [top_left, bottom_right]
+    return result, polygon_image, polygon_coordinates
 
 
 # APPROACHES
@@ -204,7 +217,7 @@ def process_template_matching_method_comparison(input_img, template, image_name,
     fig = plt.figure(constrained_layout=True, figsize=(16, 9))
     gs = GridSpec(ncols=len(methods), nrows=2, wspace=0.0, hspace=0.0, figure=fig)
     for i, method in enumerate(methods):
-        result, polygon_image = apply_template_matching_method(input_img, method, template)
+        result, polygon_image, _ = apply_template_matching_method(input_img, method, template)
         ax = fig.add_subplot(gs[0, i])
         ax.imshow(result, cmap="gray")
         ax.set_title(method)
@@ -225,17 +238,9 @@ def process_feature_mapping_approaches(template_image, input_image, image_name="
     flann_matcher(template_image, input_image, image_name=image_name)
 
 
-def process_fies():
-    for i in range(15):
-        image_name = str(i) + ".jpg"
-        print(image_name)
-        process_feature_mapping_approaches(image_name)
-
-
 def preprocess_data(image_path, template_path=str(os.path.join(DATA_FOLDER, "template.jpg"))):
     image_name = os.path.basename(image_path)
     template_image = cv2.imread(template_path)
-
     input_image = cv2.imread(image_path)
     template_image = cv2.resize(template_image, None, fx=0.5, fy=0.5)
     input_image = cv2.resize(input_image, None, fx=0.5, fy=0.5)
@@ -249,5 +254,6 @@ def test_image(image_name="1.jpg"):
     image_path = str(os.path.join(TEST_FOLDER, image_name))
     preprocess_data(image_path)
 
-    if __name__ == "__main__":
-        test_image()
+
+if __name__ == "__main__":
+    fire.Fire(test_image)
