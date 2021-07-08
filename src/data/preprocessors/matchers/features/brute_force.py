@@ -4,7 +4,7 @@ import cv2
 from matplotlib import pyplot as plt
 
 from src import DEBUG_FOLDER
-from src.data.preprocessors.matchers.feature.utils import calculate_distance_distribution, \
+from src.data.preprocessors.matchers.features.utils import calculate_distance_distribution, \
     make_distance_ratio_distribution, \
     extract_good_matches, apply_feature_detector, detect_homography_polygon
 

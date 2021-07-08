@@ -4,8 +4,8 @@ import cv2
 import fire
 
 from src import TEST_FOLDER, TEMPLATES_FOLDER
-from src.data.preprocessors.matchers.feature.core import process_feature_mapping_approaches
-from src.data.preprocessors.matchers.template.core import process_template_matching_method_comparison
+from src.data.preprocessors.matchers.features.core import process_feature_mapping_approaches
+from src.data.preprocessors.matchers.templates.core import process_template_matching_method_comparison
 
 
 def preprocess_data(image_path, template_path=str(os.path.join(TEMPLATES_FOLDER, "template.jpg"))):

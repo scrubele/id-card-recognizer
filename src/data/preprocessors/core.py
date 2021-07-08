@@ -4,8 +4,7 @@ import cv2
 import fire
 
 from src import TEST_FOLDER, DEBUG_FOLDER, TEMPLATES_FOLDER
-from src.data.preprocessors.detectors.hough_lines import find_skew_angle
-from src.data.preprocessors.matchers.feature.flann import flann_matcher
+from src.data.preprocessors.matchers.features.flann import flann_matcher
 from src.data.preprocessors.transformers.croppers import clip_by_coordinates
 from src.data.preprocessors.transformers.rotators import rotate_image
 
@@ -43,13 +42,13 @@ def process_image(template_image, input_image, image_name, template_name):
 def preprocess_data(image_path, template_path=str(os.path.join(TEMPLATES_FOLDER, "template.jpg"))):
     image_name = os.path.basename(image_path)
     template_name = os.path.basename(image_path)
-
-    template_image = cv2.imread(template_path)
-    input_image = cv2.imread(image_path)
-
-    template_image = cv2.resize(template_image, None, fx=0.5, fy=0.5)
-    input_image = cv2.resize(input_image, None, fx=0.5, fy=0.5)
-
+    try:
+        template_image = cv2.imread(template_path)
+        input_image = cv2.imread(image_path)
+        template_image = cv2.resize(template_image, None, fx=0.5, fy=0.5)
+        input_image = cv2.resize(input_image, None, fx=0.5, fy=0.5)
+    except:
+        print("Input image or template image are not found")
     process_image(template_image, input_image, image_name, template_name)
     cv2.destroyAllWindows()
 

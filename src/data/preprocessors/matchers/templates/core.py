@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 from src import DEBUG_FOLDER
-from src.data.preprocessors.matchers.template.utils import apply_template_matching_method
+from src.data.preprocessors.matchers.templates.utils import apply_template_matching_method
 
 TEMPLATE_MATCHING_METHODS = ["cv2.TM_CCOEFF", "cv2.TM_CCOEFF_NORMED", "cv2.TM_CCORR",
                              "cv2.TM_CCORR_NORMED", "cv2.TM_SQDIFF", "cv2.TM_SQDIFF_NORMED", ]
