@@ -8,31 +8,21 @@ from src import logger
 from src.data.preprocessors.matchers.features.flann import flann_matcher
 from src.data.preprocessors.transformers.croppers import clip_by_coordinates
 from src.data.preprocessors.transformers.rotators import rotate_image
+from src.data.preprocessors.utils import is_card_detected, correct_card
 from src.utils.status_manager import Status
-
-
-def is_card_detected(polygon_corners):
-    if len(polygon_corners) > 0:
-        negative_values = polygon_corners.ravel()
-        negative_values = negative_values[negative_values < 0]
-        if len(negative_values) > 0:
-            return False
-        else:
-            return True
-    else:
-        return False
 
 
 def process_image(template_image, input_image, image_name, template_name):
     polygon_corners = flann_matcher(template_image, input_image, image_name=image_name)
     if is_card_detected(polygon_corners):
+        polygon_corners, is_correct = correct_card(polygon_corners)
         clipped_image = clip_by_coordinates(input_image, polygon_corners, name="")
         logger.log_image(image_name, stage_name="clipped", image=clipped_image, save=True)
-
         rotated_image, angle = rotate_image(clipped_image)
         logger.info(f"Angle: {angle}")
         logger.log_image(image_name, stage_name="rotated", image=rotated_image, save=True)
-        return {}, Status.OK
+        status = Status.OK if is_correct else Status.PARTIAL
+        return {}, status
     else:
         logger.warning("Id card is not detected")
         return {}, Status.NOT_FOUND
