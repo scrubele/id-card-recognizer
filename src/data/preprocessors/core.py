@@ -8,6 +8,7 @@ from src import logger
 from src.data.preprocessors.matchers.features.flann import flann_matcher
 from src.data.preprocessors.transformers.croppers import clip_by_coordinates
 from src.data.preprocessors.transformers.rotators import rotate_image
+from src.utils.status_manager import Status
 
 
 def is_card_detected(polygon_corners):
@@ -31,8 +32,10 @@ def process_image(template_image, input_image, image_name, template_name):
         rotated_image, angle = rotate_image(clipped_image)
         logger.info(f"Angle: {angle}")
         logger.log_image(image_name, stage_name="rotated", image=rotated_image, save=True)
+        return {}, Status.OK
     else:
         logger.warning("Id card is not detected")
+        return {}, Status.NOT_FOUND
 
 
 def preprocess_data(image_path, template_path=str(os.path.join(TEMPLATES_FOLDER, "template.jpg"))):
@@ -45,8 +48,9 @@ def preprocess_data(image_path, template_path=str(os.path.join(TEMPLATES_FOLDER,
         input_image = cv2.resize(input_image, None, fx=0.5, fy=0.5)
     except:
         logger.warning("Input image or template image are not found")
-    process_image(template_image, input_image, image_name, template_name)
+    info, status = process_image(template_image, input_image, image_name, template_name)
     cv2.destroyAllWindows()
+    return info, status
 
 
 def test_image(image_name="1.jpg"):

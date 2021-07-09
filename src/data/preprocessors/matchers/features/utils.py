@@ -40,7 +40,10 @@ def calculate_distance_distribution(matches):
     distances = sorted([get_match(match_list).distance for match_list in matches])
     try:
         probability_distribution = norm.cdf(distances, np.mean(distances), np.std(distances))
-    except Exception:
+    except FloatingPointError:
+        logger.warning("Image is equal to template image")
+        probability_distribution = [100 for _ in range(len(distances))]
+    except RuntimeWarning or Exception:
         logger.warning("Probability distribution encountered mean of empty slice")
         probability_distribution = []
     return distances, probability_distribution
@@ -75,13 +78,22 @@ def detect_homography_polygon(input_image, template_image, template_keypoints, i
             [image_keypoints[get_match(m, dimension).trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
         M, mask = cv2.findHomography(source_points, destination_points, cv2.RANSAC, 5.0)
+        homography = M.copy()
         matches_mask = mask.ravel().tolist()
 
         h, w, d = template_image.shape
         obj_corners = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         polygon_corners = cv2.perspectiveTransform(obj_corners, M)
-
         img = draw_polygon(img, polygon_corners)
+        # cv2.imshow("img", img)
+
+        margin = 100
+        img1_warp = cv2.warpPerspective(img, homography,
+                                        (img.shape[1], img.shape[0]))
+        # cv2.imshow("img1", img1_warp)
+        # cv2.imshow("input_image", input_image)
+        # cv2.waitKey(0)
+        print(polygon_corners)
         return img, polygon_corners
     else:
         logger.warning("Not enough matches are found - {}/{}".format(len(good_matches), min_match_count))

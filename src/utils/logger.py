@@ -1,8 +1,10 @@
+import json
 import logging
 import os
 import sys
 
 import cv2
+import pandas as pd
 import yaml
 
 PROGRESS = 25
@@ -21,6 +23,8 @@ class MyLogger(logging.Logger):
         logging.Logger.__init__(self, log_name)
         self.formatter = logging.Formatter(self.LOG_FORMATTER)
         self.initLogger(level)
+        self.json_data = {}
+        self.dataframe = pd.DataFrame(columns=["image_name", "info", "status"])
 
     def initLogger(self, level=None):
         self.setLevel(level or self.DEF_LOGGING_LEVEL)
@@ -83,6 +87,22 @@ class MyLogger(logging.Logger):
             settings_dict = yaml.safe_load(info)
         self.level = dict(settings_dict)['LOGGING_LEVEL']
         self.setLevel(self.level)
+
+    def save_results(self):
+        with open(os.path.join(self.LOG_FOLDER, 'result.json'), 'w') as f:
+            json.dump(self.json_data, f)
+        self.dataframe.to_csv(os.path.join(self.LOG_FOLDER, 'result.csv'))
+
+    def log_result(self, image_name, info, status, save=False):
+        log_data = {"info": info, "status": str(status)}
+        self.json_data[image_name] = log_data
+        log_data = pd.DataFrame([[image_name, info, status]], columns=["image_name", "info", "status"])
+        self.dataframe = self.dataframe.append(log_data, ignore_index=True)
+        if save:
+            self.save_results()
+
+    def display_result(self):
+        print(self.dataframe)
 
 
 def setup_logger(progress_file=None):

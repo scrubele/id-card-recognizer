@@ -6,6 +6,7 @@ import fire
 from src import TEST_FOLDER, TEMPLATES_FOLDER
 from src.data.preprocessors.matchers.features.core import process_feature_mapping_approaches
 from src.data.preprocessors.matchers.templates.core import process_template_matching_method_comparison
+from src.utils.status_manager import Status
 
 
 def preprocess_data(image_path, template_path=str(os.path.join(TEMPLATES_FOLDER, "template.jpg"))):
@@ -18,6 +19,7 @@ def preprocess_data(image_path, template_path=str(os.path.join(TEMPLATES_FOLDER,
     process_feature_mapping_approaches(template_image, input_image, image_name=image_name)
     process_template_matching_method_comparison(template_image, input_image, image_name=image_name)
     cv2.destroyAllWindows()
+    return {}, Status.OK
 
 
 def test_image(image_name="1.jpg"):

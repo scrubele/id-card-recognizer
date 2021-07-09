@@ -7,6 +7,7 @@ from src import TEST_FOLDER
 from src.data.preprocessors.detectors.contours import process_contour_detection_approach, \
     detect_linear_contours_approach
 from src.data.preprocessors.detectors.hough_lines import process_hough_lines_approach
+from src.utils.status_manager import Status
 
 
 def preprocess_data(image_path):
@@ -17,6 +18,7 @@ def preprocess_data(image_path):
     detect_linear_contours_approach(img, image_name=image_name)
     process_contour_detection_approach(img, image_name=image_name)
     cv2.destroyAllWindows()
+    return {}, Status.OK
 
 
 def test_image(image_name="1.jpg"):
