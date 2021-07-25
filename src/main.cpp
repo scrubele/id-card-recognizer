@@ -15,7 +15,9 @@
 
 const char *keys =
         "{ help  h              | | Print help message. }"
-        "{ input i              | | Path to input image. }";
+        "{ input i              | | Path to input image. }"
+        "{ name n               | | Full name to detect. }"
+        "{ date d               | | Date to detect. }";
 
 int main(int argc, char **argv) {
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_INFO);
@@ -27,7 +29,11 @@ int main(int argc, char **argv) {
         return 0;
     }
     std::string imagePath = parser.get<std::string>("input");
+    std::string fullName = parser.get<std::string>("name");
+    std::string date = parser.get<std::string>("date");
+//    std::string fullName;
+//    std::string date;
 
-    IDCardDetector::IDCardRecogniser idCardRecogniser(imagePath, 800, 600);
-    idCardRecogniser.ProcessImage();
+    IDCardDetector::IDCardRecogniser idCardRecogniser(800, 600);
+    idCardRecogniser.ProcessImage(imagePath, fullName, date);
 }

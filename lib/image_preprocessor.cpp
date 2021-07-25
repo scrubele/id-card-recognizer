@@ -56,7 +56,7 @@ namespace IDCardDetector {
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours(inputImage, contours, hierarchy, cv::RETR_TREE,
                          cv::CHAIN_APPROX_SIMPLE);
-        std::cout << "contours" << contours.size() << std::endl;
+//        std::cout << "contours" << contours.size() << std::endl;
         for (const auto &contour : contours) {
             cv::Rect box = cv::boundingRect(contour);
             cv::drawContours(mask, std::vector<std::vector<cv::Point>>{contour}, -1,
@@ -85,7 +85,6 @@ namespace IDCardDetector {
         cv::bitwise_and(inputImage, inputImage, textOnlyImage, maskImage);
         cv::imshow("bitwise_and", textOnlyImage);
         *outputImage = textOnlyImage;
-
     }
 
 

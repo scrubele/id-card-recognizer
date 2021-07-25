@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-
 namespace IDCardDetector {
 
 
@@ -13,7 +12,7 @@ namespace IDCardDetector {
         this->ocr->SetPageSegMode(tesseract::PSM_AUTO);
     }
 
-    bool TextDetector::ExtractText(cv::Mat inputImage, std::string *text) {
+    bool TextDetector::RecogniseText(cv::Mat inputImage, std::string *text) {
         this->ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
         this->ocr->SetImage(inputImage.data, inputImage.cols, inputImage.rows, 3, inputImage.step);
         std::string outText = std::string(this->ocr->GetUTF8Text());
@@ -23,7 +22,7 @@ namespace IDCardDetector {
     }
 
 
-    bool TextDetector::RecogniseText(cv::Mat inputImage, std::string *text) {
+    bool TextDetector::ExtractText(cv::Mat inputImage, std::string *text) {
         std::string extractedText = "";
         std::vector<std::vector<cv::Point>> contours;
         std::vector<cv::Vec4i> hierarchy;
@@ -32,7 +31,7 @@ namespace IDCardDetector {
         std::cout << "contours" << contours.size() << std::endl;
         for (const auto &contour : contours) {
             cv::Rect box = cv::boundingRect(contour);
-            std::cout << box.x << " " << box.y << " " << box.width << " " << box.height << std::endl;
+//            std::cout << box.x << " " << box.y << " " << box.width << " " << box.height << std::endl;
             // check the box within the image plane
             if (0 <= box.x
                 && 0 <= box.width
@@ -43,11 +42,14 @@ namespace IDCardDetector {
 
                 cv::Rect croppedROI(box.x, box.y, box.width, box.height);
                 cv::Mat croppedImage = inputImage(croppedROI);
+                cv::Mat colorfulCropped;
+                cv::cvtColor(croppedImage, colorfulCropped, cv::COLOR_BGR2RGB);
+
                 std::string croppedText;
-                ExtractText(croppedImage, &croppedText);
-                std::cout << croppedText << std::endl;
-                cv::imshow("cropped", croppedImage);
-                cv::waitKey(0);
+                RecogniseText(colorfulCropped, &croppedText);
+//                std::cout << croppedText << std::endl;
+//                cv::imshow("cropped", colorfulCropped);
+//                cv::waitKey(0);
 
                 extractedText += croppedText;
             } else {
@@ -59,12 +61,14 @@ namespace IDCardDetector {
         *text = extractedText;
     }
 
-
     bool TextDetector::ProcessImage(cv::Mat inputImage, std::string *text) {
         std::string extractedText;
-        RecogniseText(inputImage, &extractedText);
-        std::cout << extractedText << std::endl;
+        ExtractText(inputImage, &extractedText);
+        extractedText.erase(std::remove(extractedText.begin(), extractedText.end(), '\n'),
+                            extractedText.end());
+        extractedText.erase(remove_if(extractedText.begin(), extractedText.end(), isspace), extractedText.end());
+//        std::cout << extractedText << std::endl;
+        *text = extractedText;
     }
-
 
 }

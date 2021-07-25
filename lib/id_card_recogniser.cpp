@@ -5,14 +5,14 @@
 
 
 namespace IDCardDetector {
-    IDCardRecogniser::IDCardRecogniser(std::string imagePath, int width, int height)
-            : textDetector{mainWindowName}, imagePreprocessor{mainWindowName} {
-        this->imagePath = imagePath;
+    IDCardRecogniser::IDCardRecogniser(int width, int height)
+            : textDetector{mainWindowName}, imagePreprocessor{mainWindowName}, textRecogniser{mainWindowName} {
         this->width = width;
         this->height = height;
     }
 
-    bool IDCardRecogniser::ProcessImage() {
+    bool IDCardRecogniser::ProcessImage(std::string imagePath, std::string fullName, std::string date) {
+        this->imagePath = imagePath;
         std::cout << "image path: " << this->imagePath << std::endl;
 
         cv::Mat inputImage = cv::imread(this->imagePath);
@@ -25,8 +25,12 @@ namespace IDCardDetector {
 
         cv::Mat processedImage;
         imagePreprocessor.ProcessImage(grayImage, &processedImage);
-        std::string *extractedText;
-        textDetector.ProcessImage(processedImage, extractedText);
+        std::string extractedText;
+        textDetector.ProcessImage(processedImage, &extractedText);
+//        std::cout<<extractedText;
+        std::string *recognisedValues;
+        textRecogniser.ProcessText(extractedText, fullName, date, recognisedValues);
+
 //        cv::imwrite( "test.jpg", grayImage);
         cv::waitKey(0);
         cv::waitKey(1);

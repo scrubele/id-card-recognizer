@@ -41,6 +41,7 @@ add_executable(id-card-detector
         src/main.cpp
         lib/id_card_recogniser.cpp
         lib/text_detector.cpp
+        lib/text_recogniser.cpp
         lib/image_preprocessor.cpp
         )
 

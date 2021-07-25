@@ -14,6 +14,7 @@ namespace IDCardDetector {
         explicit TextDetector(char const *);
 
         bool ExtractText(cv::Mat inputImage, std::string *text);
+
         bool RecogniseText(cv::Mat inputImage, std::string *text);
 
         bool ProcessImage(cv::Mat inputImage, std::string *text);

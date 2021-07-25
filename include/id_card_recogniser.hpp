@@ -1,5 +1,6 @@
 #include "text_detector.hpp"
 #include "image_preprocessor.hpp"
+#include "text_recogniser.hpp"
 
 #include <iostream>
 #include <opencv2/features2d.hpp>
@@ -9,11 +10,11 @@ namespace IDCardDetector {
 
     class IDCardRecogniser {
     public:
-        IDCardRecogniser(std::string imagePath, int width, int height);
+        IDCardRecogniser(int width, int height);
 
         virtual ~IDCardRecogniser();
 
-        bool ProcessImage();
+        bool ProcessImage(std::string imagePath, std::string fullName, std::string date);
 
     private:
 
@@ -26,6 +27,7 @@ namespace IDCardDetector {
 
         ImagePreprocessor imagePreprocessor;
         TextDetector textDetector;
+        TextRecogniser textRecogniser;
 
         void SaveImage();
     };
