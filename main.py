@@ -4,10 +4,10 @@ from os.path import isfile, join
 import fire
 
 from src import TEST_FOLDER, logger
-from src.data.preprocessors.core import preprocess_data
+# from src.data.preprocessors.core import preprocess_data
 
 
-# from src.data.preprocessors.matchers.core import preprocess_data
+from src.data.preprocessors.matchers.core import preprocess_data
 # from src.data.preprocessors.detectors.core import preprocess_data
 
 

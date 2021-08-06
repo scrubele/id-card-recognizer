@@ -22,7 +22,7 @@ def preprocess_data(image_path, template_path=str(os.path.join(TEMPLATES_FOLDER,
     return {}, Status.OK
 
 
-def test_image(image_name="1.jpg"):
+def test_image(image_name="00.jpg"):
     image_path = str(os.path.join(TEST_FOLDER, image_name))
     preprocess_data(image_path)
 
