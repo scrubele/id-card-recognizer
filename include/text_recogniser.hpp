@@ -14,9 +14,9 @@ namespace IDCardDetector {
     public:
         explicit TextRecogniser(char const *);
 
-        bool RecogniseName(std::string inputText, std::string name, std::string *recognisedValues);
+        int RecogniseName(std::string inputText, std::string name, std::string *recognisedValues);
 
-        bool ProcessText(std::string inputText, std::string fullName, std::string date, std::string *recognisedValues);
+        bool ProcessText(std::string inputText, std::string fullName, std::string date,std::map<std::string, int> *recognisedValues);
 
     private:
     };

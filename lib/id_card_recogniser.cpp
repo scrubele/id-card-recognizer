@@ -2,7 +2,8 @@
 
 #include <utility>
 #include <spdlog/spdlog.h>
-
+#include <fstream>
+#include <boost/filesystem.hpp>
 
 namespace IDCardDetector {
     IDCardRecogniser::IDCardRecogniser(int width, int height)
@@ -11,29 +12,44 @@ namespace IDCardDetector {
         this->height = height;
     }
 
-    bool IDCardRecogniser::ProcessImage(std::string imagePath, std::string fullName, std::string date) {
-        this->imagePath = imagePath;
-        std::cout << "image path: " << this->imagePath << std::endl;
+    void IDCardRecogniser::SaveResults(std::string text) {
+        std::ofstream resultFile;
+        resultFile.open("result.txt", std::ios_base::app);
+        resultFile << text;
+    }
 
-        cv::Mat inputImage = cv::imread(this->imagePath);
-//        imshow("Original Image", inputImage);
+    bool IDCardRecogniser::ProcessImage(cv::Mat inputImage, std::string fullName, std::string date,
+                                        std::string *text, cv::Mat *image) {
 
+        std::cout << inputImage.size() << std::endl;
+        // cv::imshow("inputImage", inputImage);
+        // imshow("Original Image", inputImage);
         cv::Mat resizedImage;
-        resize(inputImage, resizedImage, cv::Size(), 0.25, 0.25);
+        std::cout << inputImage.size();
+        double scale = float(1280) / inputImage.size().width;
+        resize(inputImage, resizedImage, cv::Size(0, 0), scale, scale);
         cv::Mat grayImage;
         cvtColor(resizedImage, grayImage, cv::COLOR_BGR2GRAY);
 
-        cv::Mat processedImage;
-        imagePreprocessor.ProcessImage(grayImage, &processedImage);
+        cv::Mat processedImage, thresholdImage;
+        imagePreprocessor.ProcessImage(grayImage, &processedImage, &thresholdImage);
+        *image = processedImage;
+        // cv::imshow("processedImage", processedImage);
         std::string extractedText;
-        textDetector.ProcessImage(processedImage, &extractedText);
-//        std::cout<<extractedText;
-        std::string *recognisedValues;
-        textRecogniser.ProcessText(extractedText, fullName, date, recognisedValues);
+        textDetector.ProcessImage(processedImage, thresholdImage, &extractedText);
 
-//        cv::imwrite( "test.jpg", grayImage);
-        cv::waitKey(0);
-        cv::waitKey(1);
+        std::cout << extractedText << std::endl;
+        std::map<std::string, int> currentRecognised;
+        textRecogniser.ProcessText(extractedText, fullName, date, &currentRecognised);
+        std::string resultText = "";
+        for (auto itr = currentRecognised.begin(); itr != currentRecognised.end(); ++itr) {
+            resultText.append(itr->first);
+            resultText.append(" ");
+            resultText.append(std::to_string(itr->second));
+            resultText.append(" ");
+            std::cout << itr->first << '\t' << itr->second << '\n';
+        }
+        *text = resultText;
     }
 
 

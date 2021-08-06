@@ -14,20 +14,23 @@ namespace IDCardDetector {
 
         virtual ~IDCardRecogniser();
 
-        bool ProcessImage(std::string imagePath, std::string fullName, std::string date);
+        bool
+        ProcessImage(cv::Mat inputImage, std::string fullName, std::string date, std::string *text, cv::Mat *image);
+
+        void SaveResults(std::string text);
 
     private:
 
         const char *mainWindowName = "ID-CARD-RECOGNISER";
         int width, height;
         std::string imagePath;
-
-        // Holds the results of id card recogniser
         std::string *resultText{};
 
         ImagePreprocessor imagePreprocessor;
         TextDetector textDetector;
         TextRecogniser textRecogniser;
+
+        cv::VideoCapture videoCapture;
 
         void SaveImage();
     };

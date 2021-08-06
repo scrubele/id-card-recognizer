@@ -13,11 +13,11 @@ namespace IDCardDetector {
     public:
         explicit TextDetector(char const *);
 
-        bool ExtractText(cv::Mat inputImage, std::string *text);
+        bool ExtractText(cv::Mat inputImage, cv::Mat thresholdInput, std::string *text);
 
         bool RecogniseText(cv::Mat inputImage, std::string *text);
 
-        bool ProcessImage(cv::Mat inputImage, std::string *text);
+        bool ProcessImage(cv::Mat inputImage, cv::Mat thresholdInput, std::string *text);
 
     private:
         const char *windowName;

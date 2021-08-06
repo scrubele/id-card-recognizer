@@ -15,7 +15,7 @@ namespace IDCardDetector {
 
         bool MakeImageMask(cv::Mat inputImage, cv::Mat *outputImage);
 
-        bool ProcessImage(cv::Mat inputImage, cv::Mat *outputImage);
+        bool ProcessImage(cv::Mat inputImage, cv::Mat *outputImage, cv::Mat *thresholdOutput);
 
     private:
         const char *windowName;
