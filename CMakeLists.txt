@@ -32,20 +32,25 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEAS
 find_package(OpenCV 4.5.2 EXACT REQUIRED PATHS /usr/local/include/opencv4/opencv2)
 set(LIBRARY_DEPS ${OpenCV_LIBS})
 find_package(spdlog REQUIRED)
+#find_package(rapidfuzz REQUIRED)
 
 include_directories(/usr/local/include/tesseract/)
 include_directories(/usr/local/include/leptonica/)
+include_directories(/usr/local/include/rapidfuzz/)
+
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include" ${OpenCV_INCLUDE_DIRS} ${Tesseract_LIBRARIES})
 add_executable(id-card-detector
         src/main.cpp
+        lib/camera.cpp
         lib/id_card_recogniser.cpp
         lib/text_detector.cpp
         lib/text_recogniser.cpp
         lib/image_preprocessor.cpp
+#        src/camera_runner.cpp
         )
 
-target_link_libraries(id-card-detector ${OpenCV_LIBS} spdlog::spdlog tesseract)
+target_link_libraries(id-card-detector ${OpenCV_LIBS} spdlog::spdlog tesseract -lboost_system -lboost_filesystem -lpthread)
 
 
 message(STATUS "")
