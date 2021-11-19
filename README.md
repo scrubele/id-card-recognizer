@@ -1,4 +1,4 @@
-# it-jim-id-card-recognizer
+# id-card-recogniser
 
 Examples of program running:
 
